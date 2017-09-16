@@ -18,6 +18,7 @@ public class Interpreter {
         Reader reader = new Reader();
         Evaluator eval = new Evaluator();
         Printer printer = new Printer();
+        ASTCounter counter = new ASTCounter();
         REPL:
         while (true) { // Read-Eval-Print-Loop (also known as REPL)
             Program p = null;
@@ -26,6 +27,7 @@ public class Interpreter {
                 if (p._e == null) continue REPL;
                 Value val = eval.valueOf(p);
                 printer.print(val);
+                counter.printCount(p);
             } catch (IOException e) {
                 System.out.println("Error reading input:" + e.getMessage());
             } catch (NullPointerException e) {

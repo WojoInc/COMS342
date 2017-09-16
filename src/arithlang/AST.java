@@ -64,6 +64,16 @@ public interface AST {
         }
     }
 
+    public static class PrimExp extends CompoundArithExp {
+        public PrimExp(List<Exp> args) {
+            super(args);
+        }
+
+        public Object accept(Visitor visitor) {
+            return visitor.visit(this);
+        }
+    }
+
     public static class AddExp extends CompoundArithExp {
         public AddExp(List<Exp> args) {
             super(args);
@@ -104,6 +114,46 @@ public interface AST {
         }
     }
 
+    public static class MrecExp extends CompoundArithExp {
+        public MrecExp(List<Exp> args) {
+            super(args);
+        }
+
+        public Object accept(Visitor visitor) {
+            return visitor.visit(this);
+        }
+    }
+
+    public static class MclrExp extends CompoundArithExp {
+        public MclrExp(List<Exp> args) {
+            super(args);
+        }
+
+        public Object accept(Visitor visitor) {
+            return visitor.visit(this);
+        }
+    }
+
+    public static class MaddExp extends CompoundArithExp {
+        public MaddExp(List<Exp> args) {
+            super(args);
+        }
+
+        public Object accept(Visitor visitor) {
+            return visitor.visit(this);
+        }
+    }
+
+    public static class MsubExp extends CompoundArithExp {
+        public MsubExp(List<Exp> args) {
+            super(args);
+        }
+
+        public Object accept(Visitor visitor) {
+            return visitor.visit(this);
+        }
+    }
+
     public interface Visitor<T> {
         // This interface should contain a signature for each concrete AST node.
         public T visit(AST.NumExp e);
@@ -117,5 +167,15 @@ public interface AST {
         public T visit(AST.DivExp e);
 
         public T visit(AST.Program p);
+
+        public T visit(AST.PrimExp e);
+
+        public T visit(AST.MrecExp e);
+
+        public T visit(AST.MclrExp e);
+
+        public T visit(AST.MaddExp e);
+
+        public T visit(AST.MsubExp e);
     }
 }

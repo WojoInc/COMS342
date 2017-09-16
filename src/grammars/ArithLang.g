@@ -57,7 +57,6 @@ grammar ArithLang;
  		')' { $ast = new DivExp($list); }
  		;
 
-
  // Lexical Specification of this Programming Language
  //  - lexical specification rules start with uppercase
  
