@@ -240,6 +240,60 @@ public interface AST {
 
     }
 
+    public static class LeteExp extends Exp {
+        List<String> _names;
+        List<Exp> _value_exps;
+        NumExp _key;
+        Exp _body;
+
+        public LeteExp(List<String> names, List<Exp> value_exps, Exp body, NumExp key) {
+            _names = names;
+            _value_exps = value_exps;
+            _body = body;
+            _key = key;
+        }
+
+        public Object accept(Visitor visitor, Env env) {
+            return visitor.visit(this, env);
+        }
+
+        public NumExp key(){return _key;}
+
+        public List<String> names() {
+            return _names;
+        }
+
+        public List<Exp> value_exps() {
+            return _value_exps;
+        }
+
+        public Exp body() {
+            return _body;
+        }
+
+    }
+
+    public static class DecExp extends Exp {
+        NumExp _key;
+        String _name;
+
+        public NumExp key(){return _key;}
+
+        public String name() {
+            return _name;
+        }
+
+        public DecExp(String name, NumExp key) {
+            this._key = key;
+            this._name = name;
+        }
+
+        @Override
+        public Object accept(Visitor visitor, Env env) {
+            return visitor.visit(this, env);
+        }
+    }
+
     public interface Visitor<T> {
         // This interface should contain a signature for each concrete AST node.
         public T visit(AST.AddExp e, Env env);
@@ -257,5 +311,9 @@ public interface AST {
         public T visit(AST.VarExp e, Env env);
 
         public T visit(AST.LetExp e, Env env); // New for the varlang
+
+        public T visit(AST.LeteExp e, Env env);
+
+        public T visit(AST.DecExp e, Env env);
     }
 }

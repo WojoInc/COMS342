@@ -13,6 +13,8 @@ import ArithLang; //Import all rules from Arithlang grammar.
         | m=multexp { $ast = $m.ast; }
         | d=divexp { $ast = $d.ast; }
         | l=letexp { $ast = $l.ast; }
+        | le=leteexp { $ast = $le.ast; }
+        | de=decexp { $ast = $de.ast; }
         ;
 
  varexp returns [VarExp ast]: 
@@ -28,6 +30,27 @@ import ArithLang; //Import all rules from Arithlang grammar.
  			')' { $ast = new LetExp($names, $value_exps, $body.ast); }
  		;
 
+  decexp returns [DecExp ast]:
+         '(' Dec
+             key=numexp
+             id=Identifier
+         ')' { $ast = new DecExp($id.text, $key.ast); }
+         ;
+
+ leteexp returns [LeteExp ast]
+        locals [ArrayList<String> names, ArrayList<Exp> value_exps]
+        @init { $names = new ArrayList<String>(); $value_exps = new ArrayList<Exp>(); } :
+     		'(' Lete
+     		//TODO expand the below rule to allow for any valid exp to be given as enc parameter. Will need to edit Evaluator accordingly.
+     		    key=numexp
+     			'(' ( '(' id=Identifier e=exp ')' { $names.add($id.text); $value_exps.add($e.ast); } )+  ')'
+     			body=exp
+     			')' { $ast = new LeteExp($names, $value_exps, $body.ast, $key.ast); }
+     	;
+
+
  // Lexical Specification of this Programming Language
  //  - lexical specification rules start with uppercase
- 
+
+Lete : 'lete' ;
+Dec : 'dec' ;

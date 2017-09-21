@@ -13,6 +13,7 @@ import varlang.AST.MultExp;
 import varlang.AST.Program;
 import varlang.AST.SubExp;
 import varlang.AST.VarExp;
+import varlang.AST.DecExp;
 import varlang.AST.Visitor;
 import varlang.Env.EmptyEnv;
 import varlang.Env.ExtendEnv;
@@ -100,6 +101,29 @@ public class Evaluator implements Visitor<Value> {
         }
 
         return (Value) e.body().accept(this, new_env);
+    }
+
+    @Override
+    public Value visit(LeteExp e, Env env) {
+        List<String> names = e.names();
+        List<Exp> value_exps = e.value_exps();
+        List<Value> values = new ArrayList<Value>(value_exps.size());
+
+        Env new_env = env;
+        NumVal key = new NumVal(e.key().v());
+        NumVal temp;
+        for (int i = 0; i < value_exps.size(); i++){
+            temp = (NumVal) value_exps.get(i).accept(this, new_env);
+            values.add(new NumVal(temp.v()+key.v()));
+            new_env = new ExtendEnv(new_env, names.get(i), values.get(i));
+        }
+
+        return (Value) e.body().accept(this, new_env);
+    }
+
+    @Override
+    public Value visit(DecExp e, Env env) {
+        return new NumVal(((NumVal)env.get(e.name())).v() - e.key().v());
     }
 
 }
