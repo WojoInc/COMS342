@@ -26,6 +26,13 @@ import ListLang; //Import all rules from ListLang grammar.
         | cons=consexp { $ast = $cons.ast; }
         | list=listexp { $ast = $list.ast; }
         | nl=nullexp { $ast = $nl.ast; }
+        | npd=numpredexp { $ast = $npd.ast; }
+        | bpd=boolpredexp { $ast = $bpd.ast; }
+        | spd=strpredexp { $ast = $spd.ast; }
+        | prpd=procpredexp { $ast = $prpd.ast; }
+        | papd=pairpredexp { $ast = $papd.ast; }
+        | lpd=listpredexp { $ast = $lpd.ast; }
+        | upd=unitpredexp { $ast = $upd.ast; }
         ;
 
  lambdaexp returns [LambdaExp ast] 
@@ -41,7 +48,11 @@ import ListLang; //Import all rules from ListLang grammar.
         locals [ArrayList<Exp> arguments = new ArrayList<Exp>();  ] :
  		'(' f=exp 
  			( e=exp { $arguments.add($e.ast); } )* 
- 		')' { $ast = new CallExp($f.ast,$arguments); }
+ 		')' { $ast = new CallExp($f.ast,$arguments); }|
+ 		'(' f=exp
+ 		    ( e=exp { $arguments.add($e.ast); } )*
+ 		    defv=exp
+ 		')' { $ast = new CallExp($f.ast, $arguments); }
  		;
 
  ifexp returns [IfExp ast] :
@@ -60,10 +71,8 @@ import ListLang; //Import all rules from ListLang grammar.
  		;
 
  equalexp returns [EqualExp ast] :
- 		'(' Equal 
- 		    e1=exp 
- 			e2=exp 
- 		')' { $ast = new EqualExp($e1.ast,$e2.ast); }
+ 		'(' Equal e1=exp e2=exp ')' { $ast = new EqualExp($e1.ast,$e2.ast); }
+ 		//| '(' Equal e1=boolexp e2=boolexp ')' { $ast = new EqualExp($e1.ast,$e2.ast); }
  		;
 
  greaterexp returns [GreaterExp ast] :
@@ -72,3 +81,33 @@ import ListLang; //Import all rules from ListLang grammar.
  			e2=exp 
  		')' { $ast = new GreaterExp($e1.ast,$e2.ast); }
  		;
+    //begin additional predicate expressions
+ numpredexp returns [NumPredExp ast] :
+        '(' Numpred e=exp ')' { $ast = new NumPredExp($e.ast); }
+        ;
+ boolpredexp returns [BoolPredExp ast] :
+        '(' Boolpred e=exp ')' { $ast = new BoolPredExp($e.ast); }
+        ;
+ strpredexp returns [StrPredExp ast] :
+        '(' Stringpred e=exp ')' { $ast = new StrPredExp($e.ast); }
+        ;
+ procpredexp returns [ProcPredExp ast] :
+        '(' Procedpred e=exp ')' { $ast = new ProcPredExp($e.ast); }
+        ;
+ pairpredexp returns [PairPredExp ast] :
+         '(' Pairpred e=exp ')' { $ast = new PairPredExp($e.ast); }
+         ;
+ listpredexp returns [ListPredExp ast] :
+         '(' Listpred e=exp ')' { $ast = new ListPredExp($e.ast); }
+         ;
+ unitpredexp returns [UnitPredExp ast] :
+        '(' Unitpred e=exp ')' { $ast = new UnitPredExp($e.ast); }
+        ;
+
+Numpred : 'number?';
+Boolpred : 'boolean?';
+Stringpred : 'string?';
+Procedpred : 'procedure?';
+Pairpred : 'pair?';
+Listpred : 'list?';
+Unitpred : 'unit?';

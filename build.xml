@@ -1,189 +1,128 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="../../IdeaProjects/COMS342/" default="build" name="pldsi-code">
-    <property environment="env"/>
-    <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.8"/>
-    <property name="source" value="1.8"/>
-    <property name="antlr.version" value="4.5"/>
+<?xml version="1.0" ?>
+<project name="lang" default="parser">
 
-    <path id="pldsi-code.classpath">
-        <pathelement location="build"/>
-        <pathelement location="lib/antlr-4.5-complete.jar"/>
-    </path>
+	<!-- ANTLR version -->
+	<property name="antlr.version" value="4.5" />
 
+	<!-- ArithLang parser -->
+	<target name="arithlang-check-parser">
+		<condition property="arithlang.parser.uptodate">
+			<and>
+				<uptodate srcfile="src/arithlang/ArithLang.g" targetfile="src/arithlang/parser/ArithLangParser.java" />
+				<uptodate srcfile="src/arithlang/ArithLang.g" targetfile="src/arithlang/parser/ArithLangLexer.java" />
+				<uptodate srcfile="src/arithlang/ArithLang.g" targetfile="src/arithlang/parser/ArithLangListener.java" />
+			</and>
+		</condition>
+	</target>
 
-    <!-- ANTLR -->
-    <target name="parser" depends="arithlang, varlang, definelang, listlang, funclang">
-    </target>
-    <target name="arithlang-check-parser">
-        <condition property="arithlang.parser.uptodate">
-            <and>
-                <uptodate srcfile="src/arithlang/ArithLang.g" targetfile="src/arithlang/parser/ArithLangParser.java"/>
-                <uptodate srcfile="src/arithlang/ArithLang.g" targetfile="src/arithlang/parser/ArithLangLexer.java"/>
-                <uptodate srcfile="src/arithlang/ArithLang.g" targetfile="src/arithlang/parser/ArithLangListener.java"/>
-            </and>
-        </condition>
-    </target>
+	<target name="arithlang" depends="arithlang-check-parser" unless="arithlang.parser.uptodate">
+		<java jar="lib/antlr-${antlr.version}-complete.jar" dir="src/arithlang/" fork="true" failonerror="true">
+			<arg value="-o" />
+			<arg value="parser/" />
+			<arg value="-no-listener" />
+			<arg value="-package" />
+			<arg value="arithlang.parser; import static arithlang.AST.*" />
+			<arg value="ArithLang.g" />
+		</java>
+	</target>
 
-    <target name="arithlang" depends="arithlang-check-parser" unless="arithlang.parser.uptodate">
-        <java jar="lib/antlr-${antlr.version}-complete.jar" dir="src/arithlang/" fork="true" failonerror="true">
-            <arg value="-o"/>
-            <arg value="parser/"/>
-            <arg value="-no-listener"/>
-            <arg value="-package"/>
-            <arg value="arithlang.parser; import static arithlang.AST.*"/>
-            <arg value="ArithLang.g"/>
-        </java>
-    </target>
+	<!-- VarLang parser -->
+	<target name="varlang-check-parser">
+		<condition property="varlang.parser.uptodate">
+			<and>
+				<uptodate srcfile="src/varlang/VarLang.g" targetfile="src/varlang/parser/VarLangParser.java" />
+				<uptodate srcfile="src/varlang/VarLang.g" targetfile="src/varlang/parser/VarLangLexer.java" />
+				<uptodate srcfile="src/varlang/VarLang.g" targetfile="src/varlang/parser/VarLangListener.java" />
+			</and>
+		</condition>
+	</target>
 
-    <target name="varlang-check-parser">
-        <condition property="varlang.parser.uptodate">
-            <and>
-                <uptodate srcfile="src/varlang/VarLang.g" targetfile="src/varlang/parser/VarLangParser.java"/>
-                <uptodate srcfile="src/varlang/VarLang.g" targetfile="src/varlang/parser/VarLangLexer.java"/>
-                <uptodate srcfile="src/varlang/VarLang.g" targetfile="src/varlang/parser/VarLangListener.java"/>
-            </and>
-        </condition>
-    </target>
+	<target name="varlang" depends="varlang-check-parser" unless="varlang.parser.uptodate">
+		<java jar="lib/antlr-${antlr.version}-complete.jar" dir="src/varlang/" fork="true" failonerror="true">
+			<arg value="-o" />
+			<arg value="parser/" />
+			<arg value="-no-listener" />
+			<arg value="-lib" />
+			<arg value="../grammars/" />
+			<arg value="-package" />
+			<arg value="varlang.parser; import static varlang.AST.*" />
+			<arg value="VarLang.g" />
+		</java>
+	</target>
+	
+	<!-- DefineLang parser -->
+	<target name="definelang-check-parser">
+		<condition property="definelang.parser.uptodate">
+			<and>
+				<uptodate srcfile="src/definelang/DefineLang.g" targetfile="src/definelang/parser/DefineLangParser.java" />
+				<uptodate srcfile="src/definelang/DefineLang.g" targetfile="src/definelang/parser/DefineLangLexer.java" />
+				<uptodate srcfile="src/definelang/DefineLang.g" targetfile="src/definelang/parser/DefineLangListener.java" />
+			</and>
+		</condition>
+	</target>
 
-    <target name="varlang" depends="varlang-check-parser" unless="varlang.parser.uptodate">
-        <java jar="lib/antlr-${antlr.version}-complete.jar" dir="src/varlang/" fork="true" failonerror="true">
-            <arg value="-o"/>
-            <arg value="parser/"/>
-            <arg value="-no-listener"/>
-            <arg value="-lib"/>
-            <arg value="../grammars/"/>
-            <arg value="-package"/>
-            <arg value="varlang.parser; import static varlang.AST.*"/>
-            <arg value="VarLang.g"/>
-        </java>
-    </target>
+	<target name="definelang" depends="definelang-check-parser" unless="definelang.parser.uptodate">
+		<java jar="lib/antlr-${antlr.version}-complete.jar" dir="src/definelang/" fork="true" failonerror="true">
+			<arg value="-o" />
+			<arg value="parser/" />
+			<arg value="-no-listener" />
+			<arg value="-lib" />
+			<arg value="../grammars/" />
+			<arg value="-package" />
+			<arg value="definelang.parser; import static definelang.AST.*" />
+			<arg value="DefineLang.g" />
+		</java>
+	</target>
 
-    <target name="definelang-check-parser">
-        <condition property="definelang.parser.uptodate">
-            <and>
-                <uptodate srcfile="src/definelang/DefineLang.g"
-                          targetfile="src/definelang/parser/DefineLangParser.java"/>
-                <uptodate srcfile="src/definelang/DefineLang.g"
-                          targetfile="src/definelang/parser/DefineLangLexer.java"/>
-                <uptodate srcfile="src/definelang/DefineLang.g"
-                          targetfile="src/definelang/parser/DefineLangListener.java"/>
-            </and>
-        </condition>
-    </target>
+	<!-- ListLang parser -->
+	<target name="listlang-check-parser">
+		<condition property="listlang.parser.uptodate">
+			<and>
+				<uptodate srcfile="src/listlang/ListLang.g" targetfile="src/listlang/parser/ListLangParser.java" />
+				<uptodate srcfile="src/listlang/ListLang.g" targetfile="src/listlang/parser/ListLangLexer.java" />
+				<uptodate srcfile="src/listlang/ListLang.g" targetfile="src/listlang/parser/ListLangListener.java" />
+			</and>
+		</condition>
+	</target>
 
-    <target name="definelang" depends="definelang-check-parser" unless="definelang.parser.uptodate">
-        <java jar="lib/antlr-${antlr.version}-complete.jar" dir="src/definelang/" fork="true" failonerror="true">
-            <arg value="-o"/>
-            <arg value="parser/"/>
-            <arg value="-no-listener"/>
-            <arg value="-lib"/>
-            <arg value="../grammars/"/>
-            <arg value="-package"/>
-            <arg value="definelang.parser; import static definelang.AST.*"/>
-            <arg value="DefineLang.g"/>
-        </java>
-    </target>
+	<target name="listlang" depends="listlang-check-parser" unless="listlang.parser.uptodate">
+		<java jar="lib/antlr-${antlr.version}-complete.jar" dir="src/listlang/" fork="true" failonerror="true">
+			<arg value="-o" />
+			<arg value="parser/" />
+			<arg value="-no-listener" />
+			<arg value="-lib" />
+			<arg value="../grammars/" />
+			<arg value="-package" />
+			<arg value="listlang.parser; import static listlang.AST.*" />
+			<arg value="ListLang.g" />
+		</java>
+	</target>
 
-    <target name="listlang-check-parser">
-        <condition property="listlang.parser.uptodate">
-            <and>
-                <uptodate srcfile="src/listlang/ListLang.g" targetfile="src/listlang/parser/ListLangParser.java"/>
-                <uptodate srcfile="src/listlang/ListLang.g" targetfile="src/listlang/parser/ListLangLexer.java"/>
-                <uptodate srcfile="src/listlang/ListLang.g" targetfile="src/listlang/parser/ListLangListener.java"/>
-            </and>
-        </condition>
-    </target>
+	<!-- FuncLang parser -->
+	<target name="funclang-check-parser">
+		<condition property="funclang.parser.uptodate">
+			<and>
+				<uptodate srcfile="src/funclang/FuncLang.g" targetfile="src/funclang/parser/FuncLangParser.java" />
+				<uptodate srcfile="src/funclang/FuncLang.g" targetfile="src/funclang/parser/FuncLangLexer.java" />
+				<uptodate srcfile="src/funclang/FuncLang.g" targetfile="src/funclang/parser/FuncLangListener.java" />
+			</and>
+		</condition>
+	</target>
 
-    <target name="listlang" depends="listlang-check-parser" unless="listlang.parser.uptodate">
-        <java jar="lib/antlr-${antlr.version}-complete.jar" dir="src/listlang/" fork="true" failonerror="true">
-            <arg value="-o"/>
-            <arg value="parser/"/>
-            <arg value="-no-listener"/>
-            <arg value="-lib"/>
-            <arg value="../grammars/"/>
-            <arg value="-package"/>
-            <arg value="listlang.parser; import static listlang.AST.*"/>
-            <arg value="ListLang.g"/>
-        </java>
-    </target>
+	<target name="funclang" depends="funclang-check-parser" unless="funclang.parser.uptodate">
+		<java jar="lib/antlr-${antlr.version}-complete.jar" dir="src/funclang/" fork="true" failonerror="true">
+			<arg value="-o" />
+			<arg value="parser/" />
+			<arg value="-no-listener" />
+			<arg value="-lib" />
+			<arg value="../grammars/" />
+			<arg value="-package" />
+			<arg value="funclang.parser; import static funclang.AST.*;" />
+			<arg value="FuncLang.g" />
+		</java>
+	</target>
 
-    <target name="funclang-check-parser">
-        <condition property="funclang.parser.uptodate">
-            <and>
-                <uptodate srcfile="src/funclang/FuncLang.g" targetfile="src/funclang/parser/FuncLangParser.java"/>
-                <uptodate srcfile="src/funclang/FuncLang.g" targetfile="src/funclang/parser/FuncLangLexer.java"/>
-                <uptodate srcfile="src/funclang/FuncLang.g" targetfile="src/funclang/parser/FuncLangListener.java"/>
-            </and>
-        </condition>
-    </target>
-
-    <target name="funclang" depends="funclang-check-parser" unless="funclang.parser.uptodate">
-        <java jar="lib/antlr-${antlr.version}-complete.jar" dir="src/funclang/" fork="true" failonerror="true">
-            <arg value="-o"/>
-            <arg value="parser/"/>
-            <arg value="-no-listener"/>
-            <arg value="-lib"/>
-            <arg value="../grammars/"/>
-            <arg value="-package"/>
-            <arg value="funclang.parser; import static funclang.AST.*"/>
-            <arg value="FuncLang.g"/>
-        </java>
-    </target>
-
-
-    <!-- Build -->
-    <target name="init">
-        <mkdir dir="build"/>
-        <copy includeemptydirs="false" todir="build">
-            <fileset dir="src">
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-    </target>
-
-    <target name="clean">
-        <delete dir="build"/>
-    </target>
-
-    <target depends="clean" name="cleanall"/>
-    <target depends="build-subprojects,build-project" name="build"/>
-
-    <target name="build-subprojects"/>
-    <target depends="init" name="build-project">
-        <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="build" includeantruntime="false" source="${source}"
-               target="${target}">
-            <src path="src"/>
-            <classpath refid="pldsi-code.classpath"/>
-        </javac>
-    </target>
-
-    <target description="Build all projects which reference this project. Useful to propagate changes."
-            name="build-refprojects"/>
-
-    <target name="run-arithlang">
-        <java classname="arithlang.Interpreter" failonerror="true" fork="yes">
-            <classpath refid="pldsi-code.classpath"/>
-        </java>
-    </target>
-
-    <target name="run-varlang">
-        <java classname="varlang.Interpreter" failonerror="true" fork="yes">
-            <classpath refid="pldsi-code.classpath"/>
-        </java>
-    </target>
-
-    <target name="run-definelang">
-        <java classname="definelang.Interpreter" failonerror="true" fork="yes">
-            <classpath refid="pldsi-code.classpath"/>
-        </java>
-    </target>
-
-    <target name="run-funclang">
-        <java classname="funclang.Interpreter" failonerror="true" fork="yes">
-            <classpath refid="pldsi-code.classpath"/>
-        </java>
-    </target>
-
+	<target name="parser" depends="arithlang, varlang, definelang, listlang, funclang" >
+	</target>
+	
 </project>

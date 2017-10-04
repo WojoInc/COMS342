@@ -6,17 +6,12 @@ grammar ArithLang;
 		e=exp { $ast = new Program($e.ast); }
 		;
 
- exp returns [Exp ast]:
+ exp returns [Exp ast]: 
 		n=numexp { $ast = $n.ast; }
         | a=addexp { $ast = $a.ast; }
         | s=subexp { $ast = $s.ast; }
         | m=multexp { $ast = $m.ast; }
         | d=divexp { $ast = $d.ast; }
-        | x=primexp { $ast = $x.ast; }
-        | mr=mrecexp { $ast = $mr.ast; }
-        | mc=mclrexp { $ast = $mc.ast; }
-        | ma=maddexp { $ast = $ma.ast; }
-        | ms=msubexp { $ast = $ms.ast; }
         ;
   
  numexp returns [NumExp ast]:
@@ -62,43 +57,6 @@ grammar ArithLang;
  		')' { $ast = new DivExp($list); }
  		;
 
- primexp returns [PrimExp ast]
-          locals [ArrayList<Exp> list]
-          @init { $list = new ArrayList<Exp>(); } :
-          '(' 'prime'
-              e=exp { $list.add($e.ast); }
-          ')' { $ast = new PrimExp($list); }
-          ;
-
- mrecexp returns [MrecExp ast]
-        locals [ArrayList<Exp> list]
-        @init { $list = new ArrayList<Exp>(); } :
-        '(' 'Mrec' ')' { $ast = new MrecExp($list); }
-        ;
-
- mclrexp returns [MclrExp ast]
-        locals [ArrayList<Exp> list]
-        @init { $list = new ArrayList<Exp>(); } :
-        '(' 'Mclr' ')' { $ast = new MclrExp($list); }
-        ;
-
- maddexp returns [MaddExp ast]
-        locals [ArrayList<Exp> list]
-        @init { $list = new ArrayList<Exp>(); } :
-        '(' 'M+'
-            e=exp { $list.add($e.ast); }
-            ( e=exp { $list.add($e.ast); } )+
-            ')' { $ast = new MaddExp($list); }
-        ;
-
- msubexp returns [MsubExp ast]
-        locals [ArrayList<Exp> list]
-        @init { $list = new ArrayList<Exp>(); } :
-        '(' 'M-'
-            e=exp { $list.add($e.ast); }
-            ( e=exp { $list.add($e.ast); } )+
-            ')' { $ast = new MsubExp($list); }
-        ;
 
  // Lexical Specification of this Programming Language
  //  - lexical specification rules start with uppercase
@@ -106,6 +64,7 @@ grammar ArithLang;
  Define : 'define' ;
  Let : 'let' ;
  Dot : '.' ;
+
  Number : DIGIT+ ;
 
  Identifier :   Letter LetterOrDigit*;
