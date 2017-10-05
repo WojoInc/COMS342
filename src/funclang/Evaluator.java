@@ -159,6 +159,10 @@ public class Evaluator implements Visitor<Value> {
 
 	@Override
 	public Value visit(LambdaExp e, Env env) { // New for funclang.
+		if(e.defParam()!=null){
+				env = new ExtendEnv(env, e.formals().get(e.formals().size() - 1),
+						(Value) e.defParam().accept(this, env));
+			}
 		return new Value.FunVal(env, e.formals(), e.body());
 	}
 	
@@ -176,11 +180,16 @@ public class Evaluator implements Visitor<Value> {
 			actuals.add((Value)exp.accept(this, env));
 		
 		List<String> formals = operator.formals();
-		if (formals.size()!=actuals.size())
+		int formaloffset=0;
+		if (formals.size()-1 == actuals.size()){
+			//if default parameter is not overriden
+			formaloffset=1;
+		}
+		else if (formals.size()!=actuals.size())
 			return new Value.DynamicError("Argument mismatch in call " + ts.visit(e, env));
 
 		Env fun_env = operator.env();
-		for (int index = 0; index < formals.size(); index++)
+		for (int index = 0; index < formals.size()-formaloffset; index++)
 			fun_env = new ExtendEnv(fun_env, formals.get(index), actuals.get(index));
 		
 		return (Value) operator.body().accept(this, fun_env);

@@ -100,8 +100,18 @@ public class Printer {
 		
 		public String visit(AST.LambdaExp e, Env env) {
 			String result = "(lambda ( ";
-			for(String formal : e.formals()) 
-				result += formal + " ";
+			if(e.defParam()!=null){
+				int i;
+				for(i=0; i<e.formals().size()-2; i++){
+					result+=e.formals().get(i) + " ";
+				}
+				result+= "(" + e.formals().get(i+1) +" = " +
+						e.defParam().accept(this, env) + ")";
+			}
+			else {
+				for (String formal : e.formals())
+					result += formal + " ";
+			}
 			result += ") ";
 			result += e.body().accept(this, env);
 			return result + ")";
@@ -192,27 +202,37 @@ public class Printer {
 
 		@Override
 		public String visit(AST.StrPredExp e, Env env) {
-			return null;
+			String result = "(string? ";
+			result += e.exp().accept(this, env);
+			return result + ")";
 		}
 
 		@Override
 		public String visit(AST.ProcPredExp e, Env env) {
-			return null;
+			String result = "(procedure? ";
+			result += e.exp().accept(this,env);
+			return result + ")";
 		}
 
 		@Override
 		public String visit(AST.PairPredExp e, Env env) {
-			return null;
+			String result = "(pair? ";
+			result += e.exp().accept(this,env);
+			return result + ")";
 		}
 
 		@Override
 		public String visit(AST.ListPredExp e, Env env) {
-			return null;
+			String result = "(list? ";
+			result += e.exp().accept(this,env);
+			return result + ")";
 		}
 
 		@Override
 		public String visit(AST.UnitPredExp e, Env env) {
-			return null;
+			String result = "(unit? ";
+			result += e.exp().accept(this,env);
+			return result + ")";
 		}
 	}
 }

@@ -40,19 +40,20 @@ import ListLang; //Import all rules from ListLang grammar.
  		@init { $formals = new ArrayList<String>(); } :
  		'(' Lambda 
  			'(' (id=Identifier { $formals.add($id.text); } )* ')'
- 			body=exp 
- 		')' { $ast = new LambdaExp($formals, $body.ast); }
+ 			body=exp
+ 		')' { $ast = new LambdaExp($formals, $body.ast, null); } |
+ 		'(' Lambda
+         	'(' (id=Identifier { $formals.add($id.text); } )*
+         	'(' (id=Identifier Equal num=Number { $formals.add($id.text); }) ')'')'
+         	body=exp
+         	')' { $ast = new LambdaExp($formals, $body.ast, new NumExp(Integer.parseInt($num.text))); }
  		;
 
  callexp returns [CallExp ast] 
         locals [ArrayList<Exp> arguments = new ArrayList<Exp>();  ] :
  		'(' f=exp 
  			( e=exp { $arguments.add($e.ast); } )* 
- 		')' { $ast = new CallExp($f.ast,$arguments); }|
- 		'(' f=exp
- 		    ( e=exp { $arguments.add($e.ast); } )*
- 		    defv=exp
- 		')' { $ast = new CallExp($f.ast, $arguments); }
+ 		')' { $ast = new CallExp($f.ast,$arguments); }
  		;
 
  ifexp returns [IfExp ast] :

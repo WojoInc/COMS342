@@ -20,8 +20,19 @@ public interface Value {
 		public Exp body() { return _body; }
 	    public String tostring() { 
 			String result = "(lambda ( ";
-			for(String formal : _formals) 
-				result += formal + " ";
+
+			if(_env.get(_formals.get(formals().size()-1))!=null){
+				int i;
+				for(i=0; i<_formals.size()-1; i++){
+					result+=_formals.get(i) + " ";
+				}
+				result+= "(" + _formals.get(i) +" = " +
+						((NumVal) _env.get(_formals.get(formals().size()-1))).v() + ")";
+			}
+			else {
+				for (String formal : _formals)
+					result += formal + " ";
+			}
 			result += ") ";
 			result += _body.accept(new Printer.Formatter(), _env);
 			return result + ")";
