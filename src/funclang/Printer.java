@@ -234,5 +234,34 @@ public class Printer {
 			result += e.exp().accept(this,env);
 			return result + ")";
 		}
+
+		@Override
+		public String visit(AST.RefExp e, Env env) {
+			String result = "(ref ";
+			result += e.val_exp().accept(this,env);
+			return result + ")";
+		}
+
+		@Override
+		public String visit(AST.DerefExp e, Env env) {
+			String result = "(deref ";
+			result += e.loc_exp().accept(this,env);
+			return result + ")";
+		}
+
+		@Override
+		public String visit(AST.SetrefExp e, Env env) {
+			String result = "(setref ";
+			result += e.loc_exp().accept(this,env) + " ";
+			result += e.val_exp().accept(this,env);
+			return result + ")";
+		}
+
+		@Override
+		public String visit(AST.FreeExp e, Env env) {
+			String result = "(free ";
+			result += e.loc_exp().accept(this,env);
+			return result + ")";
+		}
 	}
 }

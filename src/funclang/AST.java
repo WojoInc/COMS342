@@ -554,7 +554,7 @@ public interface AST {
 	}
 
 	/**
-	 * Eval expression: evaluate the program that is _val
+	 * Eval expression: evaluate the program that is val_exp
 	 * @author hridesh
 	 *
 	 */
@@ -671,7 +671,48 @@ public interface AST {
 			return visitor.visit(this, env);
 		}
 	}
+	public static class RefExp extends Exp{
+		private Exp val_exp;
+		public RefExp(Exp val){
+			val_exp = val;}
+		public Exp val_exp(){return val_exp;}
+		@Override
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this,env);
+		}
+	}
 
+	public static class DerefExp extends Exp{
+		private Exp loc_exp;
+		public DerefExp (Exp r_val){loc_exp = r_val;}
+		public Exp loc_exp(){return loc_exp;}
+		@Override
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this,env);
+		}
+	}
+
+	public static class SetrefExp extends Exp{
+		private Exp val_exp;
+		private Exp loc_exp;
+		public SetrefExp(Exp rval, Exp val){val_exp = val; loc_exp = rval;}
+		public Exp val_exp(){return val_exp;}
+		public Exp loc_exp() {return loc_exp;}
+
+		@Override
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this,env);
+		}
+	}
+	public static class FreeExp extends Exp{
+		private Exp loc_exp;
+		public FreeExp (Exp r_val){loc_exp = r_val;}
+		public Exp loc_exp(){return loc_exp;}
+		@Override
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this,env);
+		}
+	}
 	public interface Visitor <T> {
 		// This interface should contain a signature for each concrete AST node.
 		public T visit(AST.AddExp e, Env env);
@@ -706,5 +747,9 @@ public interface AST {
 		public T visit(AST.PairPredExp e, Env env);
 		public T visit(AST.ListPredExp e, Env env);
 		public T visit(AST.UnitPredExp e, Env env);
+		public T visit(AST.RefExp e, Env env);
+		public T visit(AST.DerefExp e, Env env);
+		public T visit(AST.SetrefExp e, Env env);
+		public T visit(AST.FreeExp e, Env env);
 	}
 }

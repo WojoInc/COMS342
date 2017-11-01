@@ -95,6 +95,17 @@ public interface Value {
 		public static final UnitVal v = new UnitVal();
 	    public String tostring() { return ""; }
 	}
+	static class RefVal implements Value {
+		private int loc = -1;
+		public RefVal(int loc){
+			this.loc = loc;
+		}
+		public int loc(){return loc;}
+		@Override
+		public String tostring() {
+			return "loc: " + this.loc;
+		}
+	}
 	static class DynamicError implements Value { 
 		private String message = "Unknown dynamic error.";
 		public DynamicError(String message) { this.message = message; }
