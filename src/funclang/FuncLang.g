@@ -33,6 +33,13 @@ import ListLang; //Import all rules from ListLang grammar.
         | papd=pairpredexp { $ast = $papd.ast; }
         | lpd=listpredexp { $ast = $lpd.ast; }
         | upd=unitpredexp { $ast = $upd.ast; }
+        | ref=refexp { $ast = $ref.ast; }
+        | srf=setrefexp { $ast = $srf.ast; }
+        | drf=derefexp { $ast = $drf.ast; }
+        | fre=freeexp { $ast = $fre.ast; }
+        | arr=arrayexp { $ast = $arr.ast; }
+        | idx=indexexp { $ast = $idx.ast; }
+        | arras=arrayassignexp { $ast = $arras.ast; }
         ;
 
  lambdaexp returns [LambdaExp ast] 
@@ -104,6 +111,34 @@ import ListLang; //Import all rules from ListLang grammar.
  unitpredexp returns [UnitPredExp ast] :
         '(' Unitpred e=exp ')' { $ast = new UnitPredExp($e.ast); }
         ;
+ refexp returns [RefExp ast] :
+        '(' Ref e=exp ')' { $ast = new RefExp($e.ast); }
+        ;
+ derefexp returns [DerefExp ast] :
+         '(' Deref e=exp ')' { $ast = new DerefExp($e.ast); }
+        ;
+ setrefexp returns [SetrefExp ast] :
+         '(' Setref e1=exp e2=exp ')' { $ast = new SetrefExp($e1.ast, $e2.ast); }
+        ;
+ freeexp returns [FreeExp ast] :
+         '(' Free e=exp ')' { $ast = new FreeExp($e.ast); }
+        ;
+ arrayexp returns [ArrayExp ast]
+ locals [ArrayList<Exp> dims = new ArrayList<Exp>(); ]:
+        '(' 'array' ( e=exp { $dims.add($e.ast); } ) ∗
+        ')' { $ast = new ArrayExp($dims); }
+        ;
+ indexexp returns [IndexExp ast]
+ locals [ArrayList<Exp> idxs = new ArrayList<Exp>(); ]:
+        '(' 'index' arr=exp ( e=exp { $idxs.add($e.ast); } ) +
+        ')' { $ast = new IndexExp($arr.ast, $idxs); }
+        ;
+ arrayassignexp returns [ArrAssignExp ast]
+ locals [ArrayList<Exp> idxs = new ArrayList<Exp>(); ]:
+        '(' 'assign' arr=exp ( e=exp { $idxs.add($e.ast); } ) +
+         _val=exp
+        ')' { $ast = new ArrAssignExp($arr.ast, $idxs, $_val.ast); }
+        ;
 
 Numpred : 'number?';
 Boolpred : 'boolean?';
@@ -112,3 +147,7 @@ Procedpred : 'procedure?';
 Pairpred : 'pair?';
 Listpred : 'list?';
 Unitpred : 'unit?';
+Ref : 'ref';
+Deref : 'deref';
+Setref : 'set!';
+Free : 'free';

@@ -263,5 +263,37 @@ public class Printer {
 			result += e.loc_exp().accept(this,env);
 			return result + ")";
 		}
+
+		@Override
+		public String visit(AST.ArrayExp e, Env env) {
+			String output = "(array ";
+			List<Exp> dim = e.dims();
+			for(Exp exp: dim){
+				output += exp.accept(this , env) + " ";
+			}
+			return output + ")";
+		}
+		@Override
+		public String visit(AST.IndexExp e, Env env) {
+			String output = "(index ";
+			output += e.arr().accept(this , env) + " ";
+			List<Exp> ind = e.idxs();
+			for(Exp exp: ind){
+				output += exp.accept(this , env) + " ";
+			}
+			return output + ")";
+		}
+		@Override
+		public String visit(AST.ArrAssignExp e, Env env) {
+			String output = "(assign ";
+			output += e.arr().accept(this , env) + " ";
+			List<Exp> idxs = e.idxs();
+			for(Exp exp: idxs){
+				output += exp.accept(this , env) + " ";
+			}
+			output += e.val().accept(this , env);
+			return output + ")";
+		}
 	}
+
 }

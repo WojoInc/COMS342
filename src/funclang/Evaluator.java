@@ -16,9 +16,10 @@ public class Evaluator implements Visitor<Value> {
 	Printer.Formatter ts = new Printer.Formatter();
 
 	Env initEnv = initialEnv(); //New for definelang
+	Heap heap = new Heap16Bit();
 	
 	Value valueOf(Program p) {
-			return (Value) p.accept(this, initEnv);
+		return (Value) p.accept(this, initEnv);
 	}
 
 	public static boolean compareValues(Value val1, Value val2){
@@ -341,6 +342,30 @@ public class Evaluator implements Visitor<Value> {
 		return new BoolVal(val instanceof UnitVal);
 	}
 
+	@Override
+	public Value visit(RefExp e, Env env) {
+		return heap.ref((Value) e.val_exp().accept(this,env));
+	}
+
+	@Override
+	public Value visit(DerefExp e, Env env) {
+		Exp loc_exp = e.loc_exp();
+		return heap.deref((RefVal) loc_exp.accept(this,env));
+	}
+
+	@Override
+	public Value visit(SetrefExp e, Env env) {
+		Exp loc_exp = e.loc_exp();
+		Exp val_exp = e.val_exp();
+		return heap.setref((RefVal)loc_exp.accept(this,env), (Value)val_exp.accept(this,env));
+	}
+
+	@Override
+	public Value visit(FreeExp e, Env env) {
+		heap.free((RefVal)e.loc_exp().accept(this,env));
+		return new UnitVal();
+	}
+
 	public Value visit(EvalExp e, Env env) {
 		StringVal programText = (StringVal) e.code().accept(this, env);
 		Program p = _reader.parse(programText.v());
@@ -357,6 +382,153 @@ public class Evaluator implements Visitor<Value> {
 		}
 	}
 
+	@Override
+	public Value visit(ArrayExp e, Env env) {
+		List<Exp> dimention = e.dimensions();
+		List<Integer> actualDimention = new ArrayList<>();
+		int totalNumVals = 1;
+		if(dimention. size() == 0){
+			totalNumVals = 0;
+		}
+		for(Exp exp: dimention){
+			Value val = (Value)exp.accept(this , env);
+// i f any of the dimention is dynamicErrorthen return the error
+			if(val instanceof DynamicError){
+				return val;
+			}
+// check i f the dimentions are integer
+			if(!(val instanceof NumVal) || ((NumVal)val).v() != Math. floor(((NumVal)val).v())){
+				return new DynamicError("Error: Array sizes should be integers.");
+			}
+// get the dimentions as integer
+			int dimension = (int) ((NumVal)val).v();
+			if(dimension<= 0){
+				return new DynamicError("Error: Array sizes should be positive integers.");
+			}
+			actualDimention.add(dimension);
+//update the number of elements in the array
+			totalNumVals ∗= dimension;
+		}
+		List<RefVal> refs = new ArrayList<>();
+		for(int i = 0; i < totalNumVals; i++){
+			Value res = heap. ref(new NumVal(0));
+// i f heap runs out of memory
+			if(res instanceof DynamicError){
+				return res;
+			}
+			refs .add((RefVal)res);
+		}
+// return all locations of array
+		return new ArrayVal(actualDimention, refs ,heap);
+	}
+	@Override
+	public Value visit(IndexExp e, Env env) {
+		List<Exp> indices = e.indices();
+		Exp array = e.array();
+		Value arr = (Value)array.accept(this , env);
+		if(! (arr instanceof ArrayVal)){
+			return new DynamicError("Error: First argument must be an array.");
+		}
+		if(((ArrayVal)arr).getDimentions(). size() == 0){
+			return new DynamicError("Error: An empty array has no elements to index.");
+		}
+		List<Integer> requestedIndex = new ArrayList<>();
+		int i = 0;
+		for(Exp exp: indices){
+			Value val = (Value)exp.accept(this , env);
+			if(val instanceof DynamicError){
+				return val;
+			}
+			if(!(val instanceof NumVal) || ((NumVal)val).v() != Math. floor(((NumVal)val).v()) || ((int) ((NumVal)val
+			).v() <= 0)){
+				return new DynamicError("Error: Array indices should be positive integers.");
+			}
+			int index = (int) ((NumVal)val).v();
+			if(index > ((ArrayVal)arr).getDimentions().get(i )){
+				return new DynamicError("Error: Indices should not exceed their relevant array size.");
+			}
+			requestedIndex.add(index);
+			i++;
+		}
+		i = 0;
+//Now, using indicesEval , compute the index we want to access!
+		if(requestedIndex. size() != ((ArrayVal)arr).getDimentions(). size()){
+			return new DynamicError("Error: Too many or too few indices for this array.");
+		}
+		int index = getIndex(requestedIndex, ((ArrayVal)arr).getDimentions());
+		return heap.deref(((ArrayVal)arr).getVals().get(index));
+	}
+	@Override
+	public Value visit(ArrAssignExp e, Env env) {
+		List<Exp> indices = e.indices();
+		Exp array = e.getArr();
+		Value arr = (Value)array.accept(this , env);
+		if(arr instanceof DynamicError){
+			return arr;
+		}
+		if(! (arr instanceof ArrayVal)){
+			return new DynamicError("Error: First argument must be an array.");
+		}
+		if(((ArrayVal)arr).getDimentions(). size() == 0){
+			return new DynamicError("Error: An empty array has no elements to index.");
+		}
+		List<Integer> indicesEval = new ArrayList<>();
+		int i = 0;
+		for(Exp exp: indices){
+			Value val = (Value)exp.accept(this , env);
+			if(val instanceof DynamicError){
+				return val;
+			}
+			if(!(val instanceof NumVal) || ((NumVal)val).v() != Math. floor(((NumVal)val).v())){
+				return new DynamicError("Error: Array indices should be integers.");
+			}
+			int index = ((Double)((NumVal)val).v()).intValue();
+			if(index<= 0){
+				return new DynamicError("Error: Indices must be positive.");
+			}
+			if(index > ((ArrayVal)arr).getDimentions().get(i )){
+				return new DynamicError("Error: Indices should not exceed their relevant array size.");
+			}
+			indicesEval.add(index);
+			i++;
+		}
+//Now, using indicesEval , compute the index we want to access!
+		if(indicesEval. size() != ((ArrayVal)arr).getDimentions(). size()){
+			return new DynamicError("Error: Too many or too few indices for this array.");
+		}
+		List<Integer> dims = ((ArrayVal)arr).getDimentions();
+		int index = getIndex(indicesEval, dims);
+//Check the new value
+		Value toChange = (Value)e.val().accept(this , env);
+		if(toChange instanceof DynamicError){
+			return toChange;
+		}
+		if(!(toChange instanceof NumVal)){
+			return new DynamicError("Error: Current functionality allows only numeric arrays.");
+		}
+//Update the reference and return the array.
+		heap. setref(((ArrayVal)arr).getVals().get(index) ,toChange);
+		return arr;
+	}
+	//private helper to transform a l is t of indices into the index of the 1D RefVal array.
+	private int getIndex(List<Integer> indicesEval, List<Integer> dims) {
+//First , for a one dimensional array, the index is just the index we found (−1 because 0 indexing) .
+		if (indicesEval.size() == 1) {
+			return indicesEval.get(0) −1;
+		}
+//Due to the way this homework is set up, we always have to add the f irst coordinate and the colNum∗
+		secondCoordinate.
+		int index = (indicesEval.get(1) −1)+(indicesEval.get(0) −1) ∗(dims.get(1));
+//The remainder of the coordinates are multiplied by a factor based on the arr dimensions.
+		for (int i = 2; i < indicesEval.size(); i++) {
+			int multFactor = 1;
+			for (int j = 0; j < i; j++) {
+				multFactor ∗=dims.get(j);
+			}
+			index += (indicesEval.get(i) −1) ∗multFactor;
+		}
+		return index;
+	}
 	private Env initialEnv() {
 		GlobalEnv initEnv = new GlobalEnv();
 		
