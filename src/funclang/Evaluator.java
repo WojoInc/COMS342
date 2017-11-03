@@ -384,42 +384,36 @@ public class Evaluator implements Visitor<Value> {
 
 	@Override
 	public Value visit(ArrayExp e, Env env) {
-		List<Exp> dimention = e.dimensions();
-		List<Integer> actualDimention = new ArrayList<>();
-		int totalNumVals = 1;
-		if(dimention. size() == 0){
-			totalNumVals = 0;
+		List<Exp> dims = e.dims();
+		List<Integer> dim_list = new ArrayList<>();
+		int total_nums = 1;
+		if(dims.size() == 0){
+			total_nums = 0;
 		}
-		for(Exp exp: dimention){
+		for(Exp exp: dims){
 			Value val = (Value)exp.accept(this , env);
-// i f any of the dimention is dynamicErrorthen return the error
 			if(val instanceof DynamicError){
 				return val;
 			}
-// check i f the dimentions are integer
-			if(!(val instanceof NumVal) || ((NumVal)val).v() != Math. floor(((NumVal)val).v())){
-				return new DynamicError("Error: Array sizes should be integers.");
+			if(!(val instanceof NumVal) || ((NumVal)val).v() != Math.floor(((NumVal)val).v())){
+				return new DynamicError("Error: Array sizes are not ints.");
 			}
-// get the dimentions as integer
-			int dimension = (int) ((NumVal)val).v();
-			if(dimension<= 0){
-				return new DynamicError("Error: Array sizes should be positive integers.");
+			int dim = (int)((NumVal)val).v();
+			if(dim <= 0){
+				return new DynamicError("Error: Array sizes cannot be negative.");
 			}
-			actualDimention.add(dimension);
-//update the number of elements in the array
-			totalNumVals ∗= dimension;
+			dim_list.add(dim);
+			total_nums *= dim;
 		}
-		List<RefVal> refs = new ArrayList<>();
-		for(int i = 0; i < totalNumVals; i++){
+		List<RefVal> r_vals = new ArrayList<>();
+		for(int i = 0; i < total_nums; i++){
 			Value res = heap. ref(new NumVal(0));
-// i f heap runs out of memory
 			if(res instanceof DynamicError){
 				return res;
 			}
-			refs .add((RefVal)res);
+			r_vals.add((RefVal)res);
 		}
-// return all locations of array
-		return new ArrayVal(actualDimention, refs ,heap);
+		return new ArrayVal(dim_list, r_vals ,heap);
 	}
 	@Override
 	public Value visit(IndexExp e, Env env) {
